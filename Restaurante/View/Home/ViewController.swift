@@ -32,6 +32,7 @@ class ViewController: UIViewController {
     tableView.dataSource = self
     tableView.delegate = self
     loadData()
+    loadCartData()
     tableView.register(UINib(nibName: "FoodViewCell", bundle: nil), forCellReuseIdentifier: "food_cell")
     foodList()
   }
@@ -48,6 +49,22 @@ class ViewController: UIViewController {
     }
     
   }
+  
+  func loadCartData() {
+    
+    if let cartData = defaults.object(forKey: "SavedCart") as? Data {
+      let decoder = JSONDecoder()
+      if let cartItem = try? decoder.decode([CartItem].self, from: cartData) {
+        for item in cartItem {
+          self.orderFoodService.addCartItem(item)
+          showBadge(count: self.orderFoodService.cartService.listOfCart.count)
+          self.tableView.reloadData()
+        }
+      }
+    }
+    
+  }
+  
   
   func foodList() {
     
@@ -92,14 +109,19 @@ class ViewController: UIViewController {
       price.placeholder = "Price"
     }
     
+    alert.addTextField { (description) in
+      description.placeholder = "Description"
+    }
+    
     alert.addAction(UIAlertAction(title: "Insert Item", style: .default)  { _ in
       let name = alert.textFields?[0].text ?? ""
       let amount = alert.textFields?[1].text ?? ""
       let price = alert.textFields?[2].text ?? ""
+      let desc = alert.textFields?[3].text ?? ""
       
       let foodItem = OrderFoodService.FoodItem(name: name,
                                                price: Int(price) ?? 0,
-                                               description: "")
+                                               description: desc)
       
       self.orderFoodService.addFood(foodItem: foodItem)
       

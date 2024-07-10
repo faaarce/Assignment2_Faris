@@ -44,7 +44,11 @@ extension CartViewController: UITableViewDataSource {
   
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCell(withIdentifier: "cell_cart", for: indexPath) as! CartTableViewCell
-    cell.nameLabel.text = orderFoodService.cartService.cartItemsArray[indexPath.row].food.name
+    let cart = orderFoodService.cartService.cartItemsArray[indexPath.row].food
+    cell.nameLabel.text = cart.name
+    cell.descriptionLabel.text = cart.description
+    cell.priceLabel.text = String(cart.price)
+    cell.amountLabel.text = String(orderFoodService.cartService.cartItemsArray[indexPath.row].amount)
     return cell
   }
 }

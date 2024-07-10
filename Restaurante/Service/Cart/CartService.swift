@@ -12,7 +12,9 @@ class CartService {
   private (set) var listOfCart = Set<CartItem>()
   
   var cartItemsArray: [CartItem] {
-    return Array(listOfCart)
+    get {
+      Array(listOfCart)
+    }
   }
   
   func addCart(_ cart: CartItem){
