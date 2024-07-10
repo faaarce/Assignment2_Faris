@@ -16,7 +16,7 @@ struct CartItem: Equatable, Hashable, Codable {
   
   let id: String
   let food: FoodListResponse.Food
-  let amount: Int
+  var amount: Int
   
   init(food: FoodListResponse.Food, amount: Int) {
     self.id = food.id
@@ -25,7 +25,7 @@ struct CartItem: Equatable, Hashable, Codable {
   }
   
   func hash(into hasher: inout Hasher) {
-     hasher.combine(id)
+    hasher.combine(id)
    }
 }
 

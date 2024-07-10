@@ -9,24 +9,48 @@ import Foundation
 
 
 class CartService {
-  private (set) var listOfCart = Set<CartItem>()
-  
-  var cartItemsArray: [CartItem] {
+  private var _listOfCart: Set<CartItem> {
     get {
-      Array(listOfCart)
+      Set(listOfCart)
+    }
+    
+    set {
+      listOfCart = Array(newValue)
     }
   }
   
+  private (set) var listOfCart: [CartItem] = []
+  
   func addCart(_ cart: CartItem){
-    listOfCart.insert(cart)
-    print(listOfCart)
-    print(listOfCart.count)
+    _listOfCart.insert(cart)
+    print(_listOfCart)
+    print(_listOfCart.count)
   }
   
   func removeCart(_ cart: CartItem) {
-    listOfCart = listOfCart.filter({
+    _listOfCart = _listOfCart.filter({
       $0.food.name == cart.food.name
     })
+  }
+  
+  func updateAmount(_ indexPath: IndexPath) {
+    listOfCart[indexPath.row].amount += 1
+  }
+  
+  func reduceAmount(_ indexPath:IndexPath) {
+    if listOfCart[indexPath.row].amount > 1 {
+      listOfCart[indexPath.row].amount -= 1
+    } else {
+      listOfCart.remove(at: indexPath.row)
+    }
+    /*
+     var amount = listOfCart[indexPath.row].amount
+     if amount >= 0 {
+     amount -= 1
+     } else {
+     listOfCart.remove(at: indexPath.row)
+     }
+     */
   }
 }
 
