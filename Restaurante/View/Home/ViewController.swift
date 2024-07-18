@@ -9,9 +9,10 @@ import UIKit
 
 class ViewController: UIViewController {
   let defaults = UserDefaults.standard
+  
   @IBOutlet weak var cartButton: UIButton!
   @IBOutlet weak var tableView: UITableView!
-  let foodListService: FoodListServiceable = FoodListService()
+  
   let orderFoodService: OrderFoodService = OrderFoodService()
   
   lazy var badgeLabel: UILabel = {
@@ -28,13 +29,16 @@ class ViewController: UIViewController {
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    
-    tableView.dataSource = self
-    tableView.delegate = self
+    setupUI()
     loadData()
     loadCartData()
-    tableView.register(UINib(nibName: "FoodViewCell", bundle: nil), forCellReuseIdentifier: "food_cell")
     foodList()
+  }
+  
+  func setupUI(){
+    tableView.dataSource = self
+    tableView.delegate = self
+    tableView.register(UINib(nibName: "CartTableViewCell", bundle: nil), forCellReuseIdentifier: "food_cell")
   }
   
   func loadData() {
@@ -80,6 +84,11 @@ class ViewController: UIViewController {
   
   @IBAction func cartTapped(_ sender: Any) {
     pushCartViewController()
+  }
+  
+  func pushCartViewController() {
+    let vc = CartViewController(orderFoodService: orderFoodService)
+    navigationController?.pushViewController(vc, animated: true)
   }
   
   func showBadge(count: Int) {
@@ -137,17 +146,11 @@ class ViewController: UIViewController {
       if let encoded = try? JSONEncoder().encode(foodItems) {
         UserDefaults.standard.set(encoded, forKey: "SavedFoods")
       }
-      
       DispatchQueue.main.async {
         self.tableView.reloadData()
       }
-      
     })
-    
-    
-    
     alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-    
     present(alert, animated: true)
     
   }
@@ -160,30 +163,66 @@ extension ViewController: UITableViewDataSource {
   }
   
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCell(withIdentifier: "food_cell", for: indexPath) as! FoodViewCell
+    let cell = tableView.dequeueReusableCell(withIdentifier: "food_cell", for: indexPath) as! CartTableViewCell
     let foodData = orderFoodService.foodList[indexPath.row]
-    cell.foodName.text = foodData.name
-    cell.foodPrice.text = "Rp. \(foodData.price)"
-    cell.foodDescription.text = foodData.description
+    cell.nameLabel.text = foodData.name
+    cell.priceLabel.text = "Rp. \(foodData.price)"
+    cell.descriptionLabel.text = foodData.description
+    
     return cell
   }
-  
-  
 }
+
+/*
+ extension ViewController: FoodViewCellDelegate {
+ func minusButtonTapped(indexPath: IndexPath) {
+ 
+ }
+ 
+ func plusButtonTapped(indexPath: IndexPath) {
+ 
+ let foods = orderFoodService.foodList[indexPath.row]
+ let itemCart =  CartItem(
+ food: FoodListResponse.Food(
+ name: foods.name,
+ price: foods.price,
+ description: foods.description),
+ amount: 1)
+ orderFoodService.addCartItem(itemCart) // Input ke source of truth
+ 
+ var cartItems = [CartItem]()
+ if let cartItem = self.defaults.object(forKey: "SavedCart") as? Data,
+ let loadedCartItems = try? JSONDecoder().decode([CartItem].self, from: cartItem) {
+ cartItems = loadedCartItems // Ini dari user default
+ }
+ 
+ cartItems.append(itemCart) // Ini dari item yang baru diinput
+ 
+ // digabungin dimasukkin ke user default lagi
+ 
+ if let encoded = try? JSONEncoder().encode(cartItems) {
+ defaults.set(encoded, forKey: "SavedCart") // Input ke user default
+ }
+ 
+ 
+ showBadge(count: orderFoodService.cartService.listOfCart.count)
+ }
+ 
+ 
+ }
+ */
 
 extension ViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     tableView.deselectRow(at: indexPath, animated: true)
-    let foods = orderFoodService.foodList[indexPath.row]
+    let food = orderFoodService.foodList[indexPath.row]
     let itemCart =  CartItem(
-      food: FoodListResponse.Food(
-        name: foods.name,
-        price: foods.price,
-        description: foods.description),
+      food: food,
       amount: 1)
     orderFoodService.addCartItem(itemCart)
     
     var cartItems = [CartItem]()
+    
     if let cartItem = self.defaults.object(forKey: "SavedCart") as? Data,
        let loadedCartItems = try? JSONDecoder().decode([CartItem].self, from: cartItem) {
       cartItems = loadedCartItems
@@ -199,3 +238,4 @@ extension ViewController: UITableViewDelegate {
     showBadge(count: orderFoodService.cartService.listOfCart.count)
   }
 }
+

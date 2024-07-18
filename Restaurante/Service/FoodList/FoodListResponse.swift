@@ -10,7 +10,7 @@ import Foundation
 struct FoodListResponse: Responseable {
   
   struct Food: Codable {
-    let id: String = UUID().uuidString
+    var id: String = UUID().uuidString
     let name: String
     let price: Int
     let description: String
